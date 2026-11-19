@@ -1,632 +1,212 @@
-
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Магазин</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="config.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Nunito',sans-serif}
-.header{background:linear-gradient(135deg,#6C63FF 0%,#48CAE4 100%);padding:14px 16px 10px;display:flex;align-items:center;gap:10px}
-.header-title{color:white;font-size:18px;font-weight:900}
-.header-sub{color:rgba(255,255,255,0.85);font-size:11px;font-weight:600}
-.header-right{margin-left:auto;display:flex;align-items:center;gap:8px}
-.stars-badge{background:rgba(255,255,255,0.2);border-radius:20px;padding:4px 10px;color:white;font-size:13px;font-weight:800}
-.lang-btn{background:rgba(255,255,255,0.15);border:none;border-radius:8px;padding:4px 8px;color:white;font-size:11px;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif}
-.lang-btn:hover{background:rgba(255,255,255,0.25)}
-.tab-bar{display:flex;background:#f4f3ff;border-bottom:2px solid #e0deff;overflow-x:auto;scrollbar-width:none}
-.tab-bar::-webkit-scrollbar{display:none}
-.tab{flex-shrink:0;padding:9px 10px;text-align:center;font-size:10px;font-weight:800;color:#9b97cc;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap}
-.tab.active{color:#6C63FF;border-bottom-color:#6C63FF;background:white}
-.sentence-bar{background:white;border-bottom:2px dashed #e0deff;padding:8px 12px;min-height:60px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-.sentence-placeholder{color:#c0b8f0;font-size:12px;font-weight:700;width:100%;text-align:center}
-.sentence-card{background:#6C63FF;color:white;border-radius:10px;padding:5px 8px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;position:relative;min-width:50px;max-width:70px}
-.sentence-card .sem{font-size:18px;line-height:1}
-.sentence-card .sph{width:36px;height:36px;border-radius:6px;object-fit:cover}
-.sentence-card .slb{font-size:9px;font-weight:800;text-transform:uppercase;text-align:center;line-height:1.1}
-.sentence-card .srm{position:absolute;top:-5px;right:-5px;background:#ff6b6b;color:white;border-radius:50%;width:15px;height:15px;font-size:9px;display:flex;align-items:center;justify-content:center;font-weight:900;cursor:pointer}
-.action-bar{display:flex;gap:6px;padding:7px 12px;background:white;border-bottom:1px solid #f0eeff}
-.btn{border:none;border-radius:10px;padding:7px 12px;font-size:12px;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;transition:all .15s}
-.btn-speak{background:#6C63FF;color:white;flex:1}
-.btn-speak:hover{background:#5a52e0}
-.btn-clear{background:#ffe0e0;color:#d63031}
-.btn:active{transform:scale(0.95)}
-.cat-tabs{display:flex;gap:5px;padding:7px 12px 4px;overflow-x:auto;background:#faf9ff;scrollbar-width:none}
-.cat-tabs::-webkit-scrollbar{display:none}
-.cat-btn{border:2px solid transparent;border-radius:20px;padding:4px 10px;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap;font-family:'Nunito',sans-serif;background:white;transition:all .15s}
-.cards-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:10px 12px;background:#faf9ff}
-.pecs-card{background:white;border-radius:14px;border:2.5px solid #e8e4ff;padding:10px 6px;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;transition:all .18s;position:relative;overflow:hidden}
-.pecs-card:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(108,99,255,.18);border-color:#b8b0ff}
-.pecs-card:active{transform:scale(0.93)}
-.pecs-card.added{border-color:#6C63FF;background:#f0eeff}
-.pecs-card.custom-card{border-color:#fd79a8}
-.card-emoji{font-size:30px;line-height:1}
-.card-photo{width:54px;height:54px;border-radius:10px;object-fit:cover}
-.card-label{font-size:10px;font-weight:800;color:#4a4580;text-align:center;text-transform:uppercase;letter-spacing:.3px;line-height:1.2}
-.card-del{position:absolute;top:4px;right:4px;background:#ff6b6b;color:white;border:none;border-radius:50%;width:16px;height:16px;font-size:9px;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:900;align-items:center;justify-content:center;display:none}
-.pecs-card:hover .card-del{display:flex}
-.sound-wave{position:absolute;bottom:3px;right:3px;font-size:9px;color:#b8b0ff}
-
-/* history */
-.history-list{padding:10px 12px;display:flex;flex-direction:column;gap:8px}
-.history-item{background:white;border-radius:12px;border:1.5px solid #e8e4ff;padding:10px 12px}
-.history-time{font-size:11px;color:#9b97cc;font-weight:700;margin-bottom:5px}
-.history-sentence{display:flex;gap:5px;flex-wrap:wrap}
-.history-chip{background:#f0eeff;color:#6C63FF;border-radius:7px;padding:3px 7px;font-size:11px;font-weight:800;display:flex;align-items:center;gap:3px}
-.export-bar{padding:10px 12px;background:#faf9ff;border-bottom:1px solid #e8e4ff}
-.btn-export{background:linear-gradient(135deg,#6C63FF,#48CAE4);color:white;border:none;border-radius:10px;padding:9px 16px;font-size:13px;font-weight:800;cursor:pointer;width:100%;font-family:'Nunito',sans-serif}
-
-/* parent */
-.parent-section{padding:12px}
-.section-title{font-size:13px;font-weight:900;color:#4a4580;margin-bottom:8px;display:flex;align-items:center;gap:5px}
-.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:12px}
-.stat-card{background:white;border-radius:12px;border:1.5px solid #e8e4ff;padding:10px;text-align:center}
-.stat-num{font-size:26px;font-weight:900;color:#6C63FF}
-.stat-lbl{font-size:10px;color:#9b97cc;font-weight:700;margin-top:1px}
-.chart-bar{display:flex;align-items:center;gap:7px;margin-bottom:5px}
-.chart-bar-label{font-size:10px;font-weight:700;color:#4a4580;width:56px;text-align:right;flex-shrink:0}
-.chart-bar-track{flex:1;background:#f0eeff;border-radius:5px;height:16px;overflow:hidden}
-.chart-bar-fill{height:100%;background:linear-gradient(90deg,#6C63FF,#48CAE4);border-radius:5px;display:flex;align-items:center;padding-left:5px;transition:width .6s}
-.chart-bar-val{font-size:9px;font-weight:800;color:white}
-
-/* rewards */
-.rewards-section{padding:12px}
-.reward-card{background:white;border-radius:12px;border:2px solid #e8e4ff;padding:10px;margin-bottom:7px;display:flex;align-items:center;gap:10px}
-.reward-card.unlocked{border-color:#fdcb6e;background:#fffbf0}
-.reward-icon{font-size:32px;flex-shrink:0}
-.reward-name{font-size:12px;font-weight:900;color:#4a4580}
-.reward-desc{font-size:10px;color:#9b97cc;font-weight:600;margin-top:1px}
-.reward-prog{height:5px;background:#f0eeff;border-radius:3px;margin-top:5px;overflow:hidden}
-.reward-prog-fill{height:100%;background:linear-gradient(90deg,#fdcb6e,#e17055);border-radius:3px;transition:width .6s}
-.reward-badge{font-size:10px;font-weight:800;color:#fdcb6e;background:#fffbf0;border-radius:6px;padding:3px 7px;border:1.5px solid #fdcb6e;flex-shrink:0;margin-left:auto}
-
-/* editor */
-.editor-section{padding:12px}
-.editor-form{background:white;border-radius:14px;border:1.5px solid #e8e4ff;padding:12px;margin-bottom:10px}
-.form-label{font-size:11px;font-weight:800;color:#4a4580;margin-bottom:3px;display:block}
-.form-row{margin-bottom:9px}
-.form-input{width:100%;border:1.5px solid #e8e4ff;border-radius:8px;padding:7px 9px;font-size:12px;font-family:'Nunito',sans-serif;font-weight:700;color:#4a4580;outline:none}
-.form-input:focus{border-color:#6C63FF}
-.emoji-picker{display:flex;flex-wrap:wrap;gap:5px;margin-top:3px}
-.emoji-opt{font-size:20px;cursor:pointer;padding:3px;border-radius:7px;border:2px solid transparent;transition:all .12s}
-.emoji-opt.selected{border-color:#6C63FF;background:#f0eeff}
-.photo-upload-area{border:2px dashed #e0deff;border-radius:10px;padding:14px;text-align:center;cursor:pointer;transition:all .15s;margin-top:4px}
-.photo-upload-area:hover{border-color:#6C63FF;background:#f8f7ff}
-.photo-preview{width:60px;height:60px;border-radius:10px;object-fit:cover;margin:0 auto 6px;display:block}
-.upload-label{font-size:11px;font-weight:700;color:#9b97cc}
-.btn-add-card{background:linear-gradient(135deg,#6C63FF,#48CAE4);color:white;border:none;border-radius:10px;padding:10px;width:100%;font-size:13px;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif}
-.mode-toggle{display:flex;gap:6px;margin-bottom:8px}
-.mode-btn{flex:1;border:2px solid #e8e4ff;border-radius:8px;padding:6px;font-size:11px;font-weight:800;cursor:pointer;background:white;font-family:'Nunito',sans-serif;color:#9b97cc;transition:all .15s}
-.mode-btn.active{background:#6C63FF;color:white;border-color:#6C63FF}
-
-/* feedback */
-.feedback-flash{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(108,99,255,.96);color:white;border-radius:18px;padding:12px 22px;font-size:14px;font-weight:800;display:none;z-index:999;text-align:center;pointer-events:none;max-width:250px}
-.feedback-flash.show{display:block;animation:fadeInOut 1.8s forwards}
-@keyframes fadeInOut{0%{opacity:0;transform:translate(-50%,-50%) scale(.8)}15%{opacity:1;transform:translate(-50%,-50%) scale(1)}75%{opacity:1}100%{opacity:0}}
-.star-burst{position:fixed;pointer-events:none;z-index:1000;animation:starFly 1s forwards}
-@keyframes starFly{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-100px) scale(1.6)}}
-.empty-state{text-align:center;padding:36px 16px;color:#c0b8f0}
-.empty-state .big{font-size:40px;margin-bottom:8px}
-.empty-state p{font-size:12px;font-weight:700}
+:root{--bg:#101114;--pan:#17181d;--line:#2a2c33;--tx:#eceef0;--dim:#7d818c;--w:#f4f4f2}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--tx);font-family:Manrope,system-ui,sans-serif;padding:env(safe-area-inset-top) 0 calc(24px + env(safe-area-inset-bottom))}
+.v{display:none}.v.on{display:block}
+.cap{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--dim)}
+button{font-family:inherit;cursor:pointer;color:var(--tx)}
+.top{display:flex;justify-content:space-between;align-items:flex-start;padding:24px 20px 18px}
+h1{font-size:32px;font-weight:800;letter-spacing:-.02em;line-height:1}
+.out{background:none;border:1px solid var(--line);padding:14px 16px;font-weight:600;font-size:14px;display:flex;gap:8px;align-items:center;border-radius:2px}
+.search{margin:0 20px 18px;display:flex;gap:12px;align-items:center;background:var(--pan);border:1px solid var(--line);padding:0 16px}
+.search input{flex:1;background:none;border:0;color:var(--tx);font:16px Manrope;padding:18px 0;outline:0}
+.tabs{display:flex;overflow-x:auto;border-top:1px solid var(--line);border-bottom:1px solid var(--line);scrollbar-width:none}
+.tab{flex:none;background:none;border:0;border-bottom:2px solid transparent;padding:18px 20px;font-size:13px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--dim)}
+.tab.on{color:var(--w);border-color:var(--w)}
+.filters{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;border-bottom:1px solid var(--line)}
+.sw{display:flex;gap:14px;align-items:center;background:none;border:0;font-size:15px}
+.sw i{width:42px;height:24px;border:1px solid var(--dim);position:relative;display:block}
+.sw i:after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;background:var(--dim);transition:.15s}
+.sw.on i:after{left:21px;background:var(--w)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:18px 16px}
+.card{background:var(--pan);border:1px solid var(--line);border-radius:18px;overflow:hidden;display:flex;flex-direction:column}
+.pic{position:relative;height:150px;display:grid;place-items:center;font-size:66px;background:radial-gradient(circle at 70% 20%,#3a3d46 0,#17181d 55%),#17181d}
+.pic.no{filter:grayscale(1) brightness(.6)}
+.badge{position:absolute;top:10px;left:10px;background:var(--w);color:#111;font-size:10px;font-weight:800;letter-spacing:.14em;padding:6px 9px;border-radius:99px}
+.badge.no{background:#444;color:#bbb}
+.inf{padding:14px;display:flex;flex-direction:column;flex:1}
+.nm{font-size:16px;font-weight:600;line-height:1.25}.sub{color:var(--dim);font-size:14px;margin-top:4px}
+.ft{margin-top:auto;padding-top:12px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;margin-top:14px}
+.pr{font-size:17px;font-weight:800}
+.pick{background:none;border:0;font-size:12px;font-weight:600;letter-spacing:.16em;color:var(--dim);padding:6px 0}
+.pick:disabled{opacity:.4}
+.st button{width:28px;height:28px;background:none;border:1px solid var(--line);font-size:16px;border-radius:2px}.st b{display:inline-block;min-width:24px;text-align:center}
+.cbar{position:fixed;left:16px;right:16px;bottom:calc(14px + env(safe-area-inset-bottom));background:var(--w);color:#111;border:0;padding:17px;font-weight:800;font-size:14px;letter-spacing:.1em;display:none;justify-content:space-between;border-radius:2px;z-index:5}
+.hd{display:flex;align-items:center;gap:14px;padding:14px 16px;border-bottom:1px solid var(--line)}
+.sq{width:48px;height:48px;background:var(--pan);border:1px solid var(--line);font-size:20px;border-radius:2px}
+.hd b{font-size:20px;font-weight:800;display:block}.hd .cap{font-size:11px}.hd .sp{flex:1}
+.pad{padding:16px}
+.pan{background:var(--pan);border:1px solid var(--line);padding:16px;margin-bottom:12px;border-radius:2px}
+.usr{display:flex;gap:14px;align-items:center}
+.av{width:56px;height:56px;border:1px solid var(--line);background:#0c0d10;object-fit:cover}
+.lv{margin-left:auto;border:1px solid var(--w);padding:7px 12px;font-size:12px;font-weight:800;letter-spacing:.14em}
+.bar{height:6px;background:#26272d;margin:12px 0 10px}.bar i{display:block;height:100%;background:var(--w);width:0;transition:width .4s}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.big{font-size:26px;font-weight:800;margin:10px 0 4px}
+.ach{background:var(--pan);border:1px solid var(--line);padding:14px;border-radius:2px}
+.ach.ok{border-color:#8d8f98}
+.ach .xp{float:right;border:1px solid var(--line);padding:4px 7px;font-size:11px;font-weight:600}
+.ach b{display:block;font-size:15px;margin:14px 0 4px}.ach p{font-size:12px;color:var(--dim);min-height:32px}
+.ach .n{display:flex;justify-content:space-between;font-size:11px;color:var(--dim)}
+.sec{display:flex;justify-content:space-between;margin:22px 0 12px}
+label{display:block;margin:16px 0 8px}
+.fi{width:100%;background:#0f1013;border:1px solid var(--line);padding:16px;color:var(--tx);font:16px Manrope;border-radius:2px}
+.save{width:100%;margin-top:18px;background:none;border:1px solid var(--w);padding:17px;font-weight:800;font-size:13px;letter-spacing:.18em;text-transform:uppercase;border-radius:2px}
+.save.fill{background:var(--w);color:#111}
+.line{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);font-size:14px}.line:last-child{border:0}
+.emp{text-align:center;color:var(--dim);padding:26px 8px;font-size:14px}
+:focus-visible{outline:2px dashed var(--w);outline-offset:2px}
 </style>
+</head>
+<body>
 
-<div id="app">
-<div class="header">
-  <div style="font-size:28px">🗣️</div>
-  <div>
-    <div class="header-title" id="appTitle">Я говорю!</div>
-    <div class="header-sub" id="appSub">Система общения через карточки</div>
-  </div>
-  <div class="header-right">
-    <button class="lang-btn" onclick="cycleLang()">🌍 <span id="langLabel">РУС</span></button>
-    <div class="stars-badge">⭐ <span id="starCount">0</span></div>
-  </div>
-</div>
+<section class="v on" id="v-shop">
+  <div class="top"><div><h1 id="store"></h1><div class="cap" style="margin-top:10px" id="tag"></div></div>
+    <button class="out" id="toMe"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>Профиль</button></div>
+  <label class="search"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7d818c" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input id="q" placeholder="Поиск товара…"></label>
+  <div class="tabs" id="tabs"></div>
+  <div class="filters"><button class="sw" id="sw"><i></i>Только в наличии</button><button class="out" id="sort">⇅ Цена</button></div>
+  <div class="grid" id="grid"></div>
+  <button class="cbar" id="cbar"></button>
+</section>
 
-<div class="tab-bar">
-  <div class="tab active" onclick="switchTab('cards')" id="tab-cards">🃏 <span class="t-cards">Карточки</span></div>
-  <div class="tab" onclick="switchTab('history')" id="tab-history">📋 <span class="t-history">История</span></div>
-  <div class="tab" onclick="switchTab('parent')" id="tab-parent">👨‍👩‍👧 <span class="t-parent">Родитель</span></div>
-  <div class="tab" onclick="switchTab('rewards')" id="tab-rewards">🏆 <span class="t-rewards">Награды</span></div>
-  <div class="tab" onclick="switchTab('editor')" id="tab-editor">✏️ <span class="t-editor">Создать</span></div>
-</div>
+<section class="v" id="v-cart">
+  <div class="hd"><button class="sq back">←</button><div><span class="cap">Заказ</span><b>Корзина</b></div></div>
+  <div class="pad"><div class="pan" id="clist"></div><button class="save fill" id="order">Оформить заказ</button></div>
+</section>
 
-<!-- CARDS -->
-<div id="section-cards">
-  <div class="sentence-bar" id="sentenceBar">
-    <div class="sentence-placeholder" id="placeholder">...</div>
-  </div>
-  <div class="action-bar">
-    <button class="btn btn-speak" onclick="speakSentence()" id="speakBtn">🔊 <span class="t-speak">Произнести</span></button>
-    <button class="btn btn-clear" onclick="clearSentence()">✕</button>
-  </div>
-  <div class="cat-tabs" id="catTabs"></div>
-  <div class="cards-grid" id="cardsGrid"></div>
-</div>
-
-<!-- HISTORY -->
-<div id="section-history" style="display:none">
-  <div class="export-bar">
-    <button class="btn-export" onclick="exportPDF()">📤 <span class="t-export">Экспорт истории в PDF</span></button>
-  </div>
-  <div class="history-list" id="historyList"></div>
-</div>
-
-<!-- PARENT -->
-<div id="section-parent" style="display:none">
-  <div class="parent-section">
-    <div class="section-title">📊 <span class="t-analytics">Аналитика</span></div>
-    <div class="stat-grid">
-      <div class="stat-card"><div class="stat-num" id="statTotal">0</div><div class="stat-lbl t-stotal">Всего просьб</div></div>
-      <div class="stat-card"><div class="stat-num" id="statToday">0</div><div class="stat-lbl t-stoday">Сегодня</div></div>
-      <div class="stat-card"><div class="stat-num" id="statUnique">0</div><div class="stat-lbl t-sunique">Разных слов</div></div>
-      <div class="stat-card"><div class="stat-num" id="statCards">0</div><div class="stat-lbl t-scards">Карточек</div></div>
+<section class="v" id="v-me">
+  <div class="hd"><button class="sq back">←</button><div><span class="cap" id="hs"></span><b>Личный профиль</b></div><span class="sp"></span><button class="sq" id="ref">⟳</button></div>
+  <div class="pad">
+    <div class="pan">
+      <div class="usr"><img class="av" id="av" alt=""><div><b id="un" style="font-size:18px">Гость</b><div class="dim cap" style="letter-spacing:0;text-transform:none;font-size:14px" id="ut"></div></div><span class="lv" id="lv"></span></div>
+      <div class="pan" style="margin:16px 0 14px;background:#13141a"><div style="display:flex;justify-content:space-between"><span class="cap">Ранг</span><b id="xp"></b></div><b id="rk" style="font-size:19px;display:block;margin-top:8px"></b><div class="bar"><i id="xb"></i></div><div class="cap" style="font-size:12px;letter-spacing:.04em;text-transform:none" id="xt"></div></div>
+      <div class="two"><div class="pan" style="margin:0"><span class="cap">Заказов</span><div class="big" id="s1">0</div><div class="dim cap" style="letter-spacing:0;text-transform:none;font-size:13px">Оформлено</div></div><div class="pan" style="margin:0"><span class="cap">Потрачено</span><div class="big" id="s2">0</div><div class="cap" style="letter-spacing:0;text-transform:none;font-size:13px">По всем заказам</div></div></div>
     </div>
-    <div class="section-title">🔥 <span class="t-topwords">Топ слов</span></div>
-    <div id="topWords"></div>
-  </div>
-</div>
-
-<!-- REWARDS -->
-<div id="section-rewards" style="display:none">
-  <div class="rewards-section">
-    <div class="section-title">🌟 <span class="t-achievements">Достижения</span></div>
-    <div id="rewardsList"></div>
-  </div>
-</div>
-
-<!-- EDITOR -->
-<div id="section-editor" style="display:none">
-  <div class="editor-section">
-    <div class="section-title">✏️ <span class="t-createcard">Создать карточку</span></div>
-    <div class="editor-form">
-      <div class="form-row">
-        <label class="form-label t-cardname">Название</label>
-        <input class="form-input" id="newLabel" maxlength="14">
-      </div>
-      <div class="form-row">
-        <label class="form-label t-cardcat">Категория</label>
-        <select class="form-input" id="newCat"></select>
-      </div>
-      <div class="form-row">
-        <label class="form-label t-icontype">Тип иконки</label>
-        <div class="mode-toggle">
-          <button class="mode-btn active" id="modeEmoji" onclick="setMode('emoji')">😊 Эмодзи</button>
-          <button class="mode-btn" id="modePhoto" onclick="setMode('photo')">📷 Фото</button>
-        </div>
-      </div>
-      <div id="emojiSection" class="form-row">
-        <div class="emoji-picker" id="emojiPicker"></div>
-      </div>
-      <div id="photoSection" class="form-row" style="display:none">
-        <div class="photo-upload-area" onclick="document.getElementById('photoInput').click()">
-          <img id="photoPreview" class="photo-preview" src="" style="display:none">
-          <div class="upload-label" id="uploadLabel">📷 Нажми чтобы выбрать фото</div>
-        </div>
-        <input type="file" id="photoInput" accept="image/*" style="display:none" onchange="handlePhoto(event)">
-      </div>
-      <button class="btn-add-card" onclick="addCustomCard()">➕ <span class="t-addcard">Добавить</span></button>
+    <div class="sec"><span class="cap">🏆 Достижения</span><b id="ac"></b></div>
+    <div class="two" id="achs"></div>
+    <div class="pan" style="margin-top:22px">
+      <div style="display:flex;justify-content:space-between"><b>Данные доставки</b><span class="cap">Автозаполнение</span></div>
+      <label class="cap">Имя получателя</label><input class="fi" id="fn" autocomplete="name">
+      <label class="cap">Телефон</label><input class="fi" id="fp" type="tel" placeholder="+7" autocomplete="tel">
+      <label class="cap">Город и адрес доставки</label><input class="fi" id="fa" placeholder="г. Алматы, ул. Абая 10, кв. 25" autocomplete="street-address">
+      <label class="cap">Комментарий курьеру</label><input class="fi" id="fc" placeholder="Подъезд 2, этаж 4, домофон 25К">
+      <button class="save" id="sv">Сохранить данные доставки</button>
     </div>
-    <div class="section-title"><span class="t-mycards">Мои карточки</span> (<span id="customCount">0</span>)</div>
-    <div class="cards-grid" id="customCardsGrid"></div>
+    <div class="sec"><span class="cap">История заказов · <span id="hc">0</span></span></div>
+    <div class="pan" id="hist"></div>
   </div>
-</div>
-</div>
-
-<div class="feedback-flash" id="feedback"></div>
+</section>
 
 <script>
-// ── LANGUAGES ──
-const LANGS = {
-  ru: {
-    appTitle:'Я говорю!', appSub:'Система общения через карточки',
-    placeholder:'Выбери карточки чтобы составить просьбу...',
-    speak:'Произнести', export:'Экспорт истории в PDF', analytics:'Аналитика',
-    topwords:'Топ слов', achievements:'Достижения', createcard:'Создать карточку',
-    cardname:'Название', cardcat:'Категория', icontype:'Тип иконки',
-    addcard:'Добавить', mycards:'Мои карточки',
-    stotal:'Всего просьб', stoday:'Сегодня', sunique:'Разных слов', scards:'Карточек',
-    cards:'Карточки', history:'История', parent:'Родитель', rewards:'Награды', editor:'Создать',
-    iwant:'Я хочу: ', maxcards:'Максимум 6 карточек!', addFirst:'Добавь карточки!',
-    added:'✨ Карточка добавлена!', enterName:'Введи название!', noHistory:'Пока нет истории',
-    langLabel:'РУС', voiceLang:'ru-RU',
-    cats:['🌟 Все','🍎 Еда','🧃 Напитки','😊 Чувства','🏃 Действия','🏠 Места','👨‍👩‍👧 Люди','🙏 Нужды'],
-    rewards:[
-      {name:'Первый шаг',desc:'Составь первую просьбу'},
-      {name:'Отличный старт',desc:'Составь 5 просьб'},
-      {name:'Мастер слов',desc:'Составь 10 просьб'},
-      {name:'Король речи',desc:'Составь 20 просьб'},
-      {name:'Словарь растёт',desc:'Используй 5 разных слов'},
-      {name:'Богатый словарь',desc:'Используй 10 разных слов'},
-      {name:'Творец',desc:'Создай свою карточку'},
-    ]
-  },
-  kz: {
-    appTitle:'Мен сөйлеймін!', appSub:'Карточкалар арқылы қарым-қатынас',
-    placeholder:'Сұраныс жасау үшін карточкаларды таңдаңыз...',
-    speak:'Айту', export:'Тарихты PDF-ке шығару', analytics:'Талдау',
-    topwords:'Үздік сөздер', achievements:'Жетістіктер', createcard:'Карточка жасау',
-    cardname:'Атауы', cardcat:'Санат', icontype:'Белгіше түрі',
-    addcard:'Қосу', mycards:'Менің карточкаларым',
-    stotal:'Барлық сұраныс', stoday:'Бүгін', sunique:'Түрлі сөздер', scards:'Карточкалар',
-    cards:'Карточкалар', history:'Тарих', parent:'Ата-ана', rewards:'Жүлделер', editor:'Жасау',
-    iwant:'Мен қалаймын: ', maxcards:'Максимум 6 карточка!', addFirst:'Карточка қос!',
-    added:'✨ Карточка қосылды!', enterName:'Атауды енгіз!', noHistory:'Тарих жоқ',
-    langLabel:'ҚАЗ', voiceLang:'kk-KZ',
-    cats:['🌟 Барлығы','🍎 Тағам','🧃 Сусын','😊 Сезімдер','🏃 Әрекеттер','🏠 Орындар','👨‍👩‍👧 Адамдар','🙏 Қажеттіліктер'],
-    rewards:[
-      {name:'Алғашқы қадам',desc:'Бірінші сұраныс жаса'},
-      {name:'Керемет бастама',desc:'5 сұраныс жаса'},
-      {name:'Сөз шебері',desc:'10 сұраныс жаса'},
-      {name:'Сөз патшасы',desc:'20 сұраныс жаса'},
-      {name:'Сөздік өседі',desc:'5 түрлі сөз қолдан'},
-      {name:'Бай сөздік',desc:'10 түрлі сөз қолдан'},
-      {name:'Шығармашыл',desc:'Өз карточкаңды жаса'},
-    ]
-  },
-  en: {
-    appTitle:'I Speak!', appSub:'Picture Exchange Communication System',
-    placeholder:'Tap cards to build your request...',
-    speak:'Speak', export:'Export history to PDF', analytics:'Analytics',
-    topwords:'Top words', achievements:'Achievements', createcard:'Create a card',
-    cardname:'Name', cardcat:'Category', icontype:'Icon type',
-    addcard:'Add', mycards:'My cards',
-    stotal:'Total requests', stoday:'Today', sunique:'Unique words', scards:'Cards',
-    cards:'Cards', history:'History', parent:'Parent', rewards:'Rewards', editor:'Create',
-    iwant:'I want: ', maxcards:'Max 6 cards!', addFirst:'Add some cards!',
-    added:'✨ Card added!', enterName:'Enter a name!', noHistory:'No history yet',
-    langLabel:'ENG', voiceLang:'en-US',
-    cats:['🌟 All','🍎 Food','🧃 Drinks','😊 Feelings','🏃 Actions','🏠 Places','👨‍👩‍👧 People','🙏 Needs'],
-    rewards:[
-      {name:'First step',desc:'Make your first request'},
-      {name:'Great start',desc:'Make 5 requests'},
-      {name:'Word master',desc:'Make 10 requests'},
-      {name:'Speech king',desc:'Make 20 requests'},
-      {name:'Growing vocabulary',desc:'Use 5 different words'},
-      {name:'Rich vocabulary',desc:'Use 10 different words'},
-      {name:'Creator',desc:'Create your own card'},
-    ]
-  }
-};
-const LANG_ORDER = ['ru','kz','en'];
-let langIdx = 0;
-let L = LANGS.ru;
+const {SB,KEY}=window.CFG;
+const STORE="SPLYXX", TAG="PAPOI STORE", CUR="₸";
+let P=[];
+const R=[["Клиент",0],["Заглянул на огонёк",150],["Свой человек",400],["Постоянный клиент",900],["Легенда",1800]];
+const A=[
+ ["Первый заказ","1 оформленный заказ",100,1,s=>s.o],
+ ["Третий заход","3 заказа",200,3,s=>s.o],
+ ["Ночная сова","Заказ ночью (22:00–05:00)",150,1,s=>s.night],
+ ["Фил","Купить 5 пар наушников",200,5,s=>s.u["Наушники"]||0],
+ ["Мажор","Купить 2 телефона",150,2,s=>s.u["Телефоны"]||0],
+ ["Мелочёвка","Купить 5 мышек",150,5,s=>s.u["Мышки"]||0],
+ ["Затарился по-братски","5 и более единиц в одном заказе",200,5,s=>s.mu],
+ ["Разносторонний","Купить 6 разных товаров",250,6,s=>s.d],
+ ["Три в одном","3 категории в одном заказе",150,3,s=>s.mc],
+ ["Тяжёлый люкс","Один заказ от 50 000 "+CUR,300,50000,s=>s.max],
+ ["Ветеран","10 заказов",400,10,s=>s.o],
+ ["Крёстный отец кассы","Потратить 150 000 "+CUR,600,150000,s=>s.sum]];
+const tg=window.Telegram?.WebApp; if(tg){tg.ready();tg.expand()}
+const $=i=>document.getElementById(i),f=n=>n.toLocaleString("ru-RU")+" "+CUR;
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+let cart={},cat="Все",only=false,sort=0,db={orders:[],form:{}};
+try{db=JSON.parse(localStorage.getItem("shop2")||"")||db}catch(e){}
+const save=()=>{try{localStorage.setItem("shop2",JSON.stringify(db))}catch(e){}};
+const U=tg?.initDataUnsafe?.user||{};
+$("store").textContent=STORE;$("tag").textContent=TAG;$("hs").textContent=STORE;
 
-function cycleLang() {
-  langIdx = (langIdx+1)%3;
-  L = LANGS[LANG_ORDER[langIdx]];
-  applyLang();
-  renderCatTabs(); renderCards(); renderRewards(); renderHistory();
-  populateCatSelect();
+function go(v){document.querySelectorAll(".v").forEach(x=>x.classList.toggle("on",x.id==="v-"+v));
+ if(v==="me")me();if(v==="cart")rcart();if(v==="shop")shop();scrollTo(0,0)}
+$("toMe").onclick=()=>go("me");$("cbar").onclick=()=>go("cart");
+document.querySelectorAll(".back").forEach(b=>b.onclick=()=>go("shop"));$("ref").onclick=me;
+
+function shop(){
+ const cats=["Все",...new Set(P.map(p=>p.c))];
+ $("tabs").innerHTML=cats.map(c=>`<button class="tab ${c===cat?"on":""}" data-c="${c}">${c}</button>`).join("");
+ const q=$("q").value.trim().toLowerCase();
+ let l=P.filter(p=>(cat==="Все"||p.c===cat)&&(!only||p.st>0)&&(!q||(p.n+p.s).toLowerCase().includes(q)));
+ if(sort)l=[...l].sort((a,b)=>(a.p-b.p)*sort);
+ $("grid").innerHTML=l.length?l.map(p=>`<div class="card"><div class="pic ${p.st?"":"no"}">${p.img?`<img src="${p.img}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">`:p.e}<span class="badge ${p.st?"":"no"}">${p.st?"В НАЛИЧИИ":"НЕТ В НАЛИЧИИ"}</span></div>
+ <div class="inf"><div class="nm">${p.n}</div><div class="sub">${p.s}</div><div class="ft"><span class="pr">${f(p.p)}</span>
+ ${cart[p.id]?`<span class="st"><button data-i="${p.id}" data-d="-1">−</button><b>${cart[p.id]}</b><button data-i="${p.id}" data-d="1">+</button></span>`:`<button class="pick" data-i="${p.id}" data-d="1" ${p.st?"":"disabled"}>ВЫБРАТЬ →</button>`}</div></div></div>`).join(""):`<div class="emp" style="grid-column:1/-1">Ничего не найдено</div>`;
+ const n=Object.values(cart).reduce((a,b)=>a+b,0);
+ $("cbar").style.display=n?"flex":"none";$("cbar").innerHTML=`<span>КОРЗИНА · ${n}</span><span>${f(tot())} →</span>`;
 }
-function applyLang() {
-  const qs = (sel,txt) => document.querySelectorAll(sel).forEach(e=>e.textContent=txt);
-  document.getElementById('appTitle').textContent = L.appTitle;
-  document.getElementById('appSub').textContent = L.appSub;
-  document.getElementById('langLabel').textContent = L.langLabel;
-  document.getElementById('placeholder').textContent = L.placeholder;
-  qs('.t-speak', L.speak); qs('.t-export', L.export); qs('.t-analytics', L.analytics);
-  qs('.t-topwords', L.topwords); qs('.t-achievements', L.achievements);
-  qs('.t-createcard', L.createcard); qs('.t-cardname', L.cardname);
-  qs('.t-cardcat', L.cardcat); qs('.t-icontype', L.icontype);
-  qs('.t-addcard', L.addcard); qs('.t-mycards', L.mycards);
-  qs('.t-stotal', L.stotal); qs('.t-stoday', L.stoday);
-  qs('.t-sunique', L.sunique); qs('.t-scards', L.scards);
-  qs('.t-cards', L.cards); qs('.t-history', L.history);
-  qs('.t-parent', L.parent); qs('.t-rewards', L.rewards); qs('.t-editor', L.editor);
-}
+$("tabs").onclick=e=>{const c=e.target.dataset.c;if(c){cat=c;shop()}};
+$("q").oninput=shop;
+$("sw").onclick=()=>{only=!only;$("sw").classList.toggle("on",only);shop()};
+$("sort").onclick=()=>{sort=sort===1?-1:1;$("sort").textContent=sort===1?"↑ Цена":"↓ Цена";shop()};
+function chg(e){const b=e.target.closest("[data-i]");if(!b)return;const i=b.dataset.i;
+ cart[i]=(cart[i]||0)+ +b.dataset.d;if(cart[i]<=0)delete cart[i];tg?.HapticFeedback?.impactOccurred("light");
+ $("v-cart").classList.contains("on")?rcart():shop()}
+$("grid").onclick=chg;$("clist").onclick=chg;
+const tot=()=>Object.entries(cart).reduce((s,[i,q])=>s+P.find(p=>p.id==i).p*q,0);
 
-// ── CARD DATA with multilingual labels ──
-const CARD_DATA = [
-  {id:1,emoji:'🍎',ru:'Яблоко',kz:'Алма',en:'Apple',cat:'food'},
-  {id:2,emoji:'🍌',ru:'Банан',kz:'Банан',en:'Banana',cat:'food'},
-  {id:3,emoji:'🍪',ru:'Печенье',kz:'Печенье',en:'Cookie',cat:'food'},
-  {id:4,emoji:'🍞',ru:'Хлеб',kz:'Нан',en:'Bread',cat:'food'},
-  {id:5,emoji:'🍕',ru:'Пицца',kz:'Пицца',en:'Pizza',cat:'food'},
-  {id:6,emoji:'🍫',ru:'Шоколад',kz:'Шоколад',en:'Chocolate',cat:'food'},
-  {id:7,emoji:'💧',ru:'Вода',kz:'Су',en:'Water',cat:'drink'},
-  {id:8,emoji:'🧃',ru:'Сок',kz:'Шырын',en:'Juice',cat:'drink'},
-  {id:9,emoji:'🥛',ru:'Молоко',kz:'Сүт',en:'Milk',cat:'drink'},
-  {id:10,emoji:'🍵',ru:'Чай',kz:'Шай',en:'Tea',cat:'drink'},
-  {id:11,emoji:'😊',ru:'Рад',kz:'Қуанышты',en:'Happy',cat:'feelings'},
-  {id:12,emoji:'😢',ru:'Грустно',kz:'Қайғылы',en:'Sad',cat:'feelings'},
-  {id:13,emoji:'😫',ru:'Устал',kz:'Шаршадым',en:'Tired',cat:'feelings'},
-  {id:14,emoji:'🤕',ru:'Больно',kz:'Ауырады',en:'Hurt',cat:'feelings'},
-  {id:15,emoji:'😨',ru:'Страшно',kz:'Қорқынышты',en:'Scared',cat:'feelings'},
-  {id:16,emoji:'🤗',ru:'Обнять',kz:'Құшақта',en:'Hug',cat:'actions'},
-  {id:17,emoji:'▶️',ru:'Играть',kz:'Ойнау',en:'Play',cat:'actions'},
-  {id:18,emoji:'😴',ru:'Спать',kz:'Ұйықтау',en:'Sleep',cat:'actions'},
-  {id:19,emoji:'📺',ru:'ТВ',kz:'ТВ',en:'TV',cat:'actions'},
-  {id:20,emoji:'🚶',ru:'Идти',kz:'Жүру',en:'Walk',cat:'actions'},
-  {id:21,emoji:'🏠',ru:'Дом',kz:'Үй',en:'Home',cat:'places'},
-  {id:22,emoji:'🚗',ru:'Машина',kz:'Машина',en:'Car',cat:'places'},
-  {id:23,emoji:'🛁',ru:'Ванна',kz:'Ванна',en:'Bath',cat:'places'},
-  {id:24,emoji:'👩',ru:'Мама',kz:'Апа',en:'Mom',cat:'people'},
-  {id:25,emoji:'👨',ru:'Папа',kz:'Әке',en:'Dad',cat:'people'},
-  {id:26,emoji:'👦',ru:'Я',kz:'Мен',en:'Me',cat:'people'},
-  {id:27,emoji:'🙏',ru:'Пожалуйста',kz:'Өтінемін',en:'Please',cat:'needs'},
-  {id:28,emoji:'✅',ru:'Да',kz:'Иә',en:'Yes',cat:'needs'},
-  {id:29,emoji:'❌',ru:'Нет',kz:'Жоқ',en:'No',cat:'needs'},
-  {id:30,emoji:'🆘',ru:'Помощь',kz:'Көмек',en:'Help',cat:'needs'},
-  {id:31,emoji:'🚽',ru:'Туалет',kz:'Дәретхана',en:'Toilet',cat:'needs'},
-];
+function rcart(){const k=Object.keys(cart);
+ $("order").style.display=k.length?"block":"none";
+ $("clist").innerHTML=k.length?k.map(i=>{const p=P.find(x=>x.id==i);return `<div class="line"><div><div class="nm">${p.e} ${p.n}</div><div class="sub">${f(p.p)}</div></div><span class="st"><button data-i="${i}" data-d="-1">−</button><b>${cart[i]}</b><button data-i="${i}" data-d="1">+</button></span></div>`}).join("")
+ +`<div class="line"><b>Итого</b><b>${f(tot())}</b></div>`:`<div class="emp">Корзина пуста</div>`}
 
-const CAT_IDS = ['all','food','drink','feelings','actions','places','people','needs'];
-const EMOJI_POOL = ['🍫','🍦','🍩','🧁','🍇','🍓','🥝','🌽','🥕','🧀','🌮','🍜','🥐','🍰','🎈','🎮','🚲','🐶','🐱','🌈','⚽','🎵','📚','🎨','🛴','🧸','🦋','🌸','🎀','🚀'];
-const REWARD_DEFS = [
-  {id:'r1',icon:'🌟',need:1,key:'total'},{id:'r2',icon:'🎉',need:5,key:'total'},
-  {id:'r3',icon:'🏆',need:10,key:'total'},{id:'r4',icon:'👑',need:20,key:'total'},
-  {id:'r5',icon:'📚',need:5,key:'unique'},{id:'r6',icon:'🧠',need:10,key:'unique'},
-  {id:'r7',icon:'✨',need:1,key:'custom'},
-];
+$("order").onclick=async()=>{const d=db.form;
+ if(!d.name||!d.phone||!d.addr){alert("Сначала заполни данные доставки в профиле");go("me");return}
+ $("order").disabled=true;
+ try{
+  const r=await fetch(SB+"/rest/v1/rpc/create_order",{method:"POST",headers:{apikey:KEY,"Content-Type":"application/json"},
+   body:JSON.stringify({p_items:Object.entries(cart).map(([id,qty])=>({id:+id,qty})),p_name:d.name,p_phone:d.phone,p_addr:d.addr,p_note:d.note||"",p_tg_id:U.id||null,p_tg_username:U.username||null})});
+  const j=await r.json();
+  if(!r.ok)throw new Error(j.message||"Не удалось оформить заказ");
+  db.orders.unshift({ts:Date.now(),h:new Date().getHours(),sum:j.total,items:j.items,addr:d.addr});save();cart={};
+  const pl={type:"order",id:j.id,items:j.items.map(({name,qty,price})=>({name,qty,price})),sum:j.total,cur:CUR,name:d.name,phone:d.phone,addr:d.addr,note:d.note||""};
+  if(tg)tg.sendData(JSON.stringify(pl));else{alert("Заказ №"+j.id+" создан");go("shop")}
+ }catch(e){alert(e.message);await loadP()}
+ $("order").disabled=false};
 
-// card sounds: different tones per category
-const CAT_TONES = {food:523,drink:587,feelings:659,actions:784,places:698,people:880,needs:440};
+function stats(){const o=db.orders,s={o:o.length,sum:0,max:0,night:0,u:{},mu:0,mc:0},ids=new Set;
+ o.forEach(x=>{s.sum+=x.sum;s.max=Math.max(s.max,x.sum);if(x.h>=22||x.h<5)s.night++;
+  let u=0;const c=new Set;x.items.forEach(i=>{u+=i.qty;ids.add(i.id);c.add(i.cat);s.u[i.cat]=(s.u[i.cat]||0)+i.qty});
+  s.mu=Math.max(s.mu,u);s.mc=Math.max(s.mc,c.size)});s.d=ids.size;return s}
 
-let sentence=[], history=[], customCards=[], nextId=200;
-let activeCategory='all', stars=0, totalRequests=0, wordCount={};
-let selectedEmoji=EMOJI_POOL[0], photoDataURL=null, editorMode='emoji';
-
-function getLabel(card) {
-  const lang = LANG_ORDER[langIdx];
-  return card[lang] || card.ru || card.label || '';
-}
-
-function init() {
-  applyLang();
-  renderCatTabs();
-  renderCards();
-  renderEmojiPicker();
-  populateCatSelect();
-  renderRewards();
-  renderCustomCards();
-}
-
-function renderCatTabs() {
-  const cats = L.cats;
-  document.getElementById('catTabs').innerHTML = CAT_IDS.map((id,i)=> {
-    const label = cats[i]||id;
-    const colors = ['#6C63FF','#ff7675','#74b9ff','#fdcb6e','#55efc4','#a29bfe','#fd79a8','#00b894'];
-    const active = id===activeCategory;
-    return `<button class="cat-btn" style="${active?'background:'+colors[i]+';color:white;border-color:'+colors[i]:''}" onclick="setCategory('${id}')">${label}</button>`;
-  }).join('');
-}
-
-function setCategory(id){activeCategory=id;renderCatTabs();renderCards()}
-
-function renderCards() {
-  const allCards = [...CARD_DATA, ...customCards];
-  const filtered = activeCategory==='all' ? allCards : allCards.filter(c=>c.cat===activeCategory);
-  const addedIds = sentence.map(s=>s.id);
-  document.getElementById('cardsGrid').innerHTML = filtered.map(card => {
-    const label = getLabel(card);
-    const img = card.photo ? `<img src="${card.photo}" class="card-photo">` : `<div class="card-emoji">${card.emoji||'❓'}</div>`;
-    const tone = CAT_TONES[card.cat]||523;
-    return `<div class="pecs-card${addedIds.includes(card.id)?' added':''}${card.custom?' custom-card':''}" onclick="addCard(${card.id})">
-      ${card.custom?`<button class="card-del" onclick="event.stopPropagation();deleteCustom(${card.id})">✕</button>`:''}
-      ${img}
-      <div class="card-label">${label}</div>
-      <div class="sound-wave">♪</div>
-    </div>`;
-  }).join('');
-}
-
-function addCard(id) {
-  if(sentence.length>=6){showFeedback(L.maxcards);return}
-  const all=[...CARD_DATA,...customCards];
-  const card=all.find(c=>c.id===id);
-  sentence.push(card);
-  playTone(CAT_TONES[card.cat]||523);
-  renderSentence(); renderCards();
-}
-
-function renderSentence() {
-  const bar=document.getElementById('sentenceBar');
-  document.getElementById('placeholder').style.display=sentence.length?'none':'block';
-  bar.querySelectorAll('.sentence-card').forEach(e=>e.remove());
-  sentence.forEach((card,i)=>{
-    const el=document.createElement('div');
-    el.className='sentence-card';
-    const media = card.photo
-      ? `<img src="${card.photo}" class="sph">`
-      : `<span class="sem">${card.emoji||'❓'}</span>`;
-    el.innerHTML=`<span class="srm" onclick="removeFromSentence(${i})">✕</span>${media}<span class="slb">${getLabel(card)}</span>`;
-    bar.appendChild(el);
-  });
-}
-
-function removeFromSentence(i){sentence.splice(i,1);renderSentence();renderCards()}
-function clearSentence(){sentence=[];renderSentence();renderCards()}
-
-function speakSentence() {
-  if(!sentence.length){showFeedback(L.addFirst);return}
-  const text = sentence.map(c=>getLabel(c)).join(', ');
-  if('speechSynthesis'in window){
-    window.speechSynthesis.cancel();
-    const u=new SpeechSynthesisUtterance(L.iwant+text);
-    u.lang=L.voiceLang; u.rate=0.85; u.pitch=1.1;
-    window.speechSynthesis.speak(u);
-  }
-  sentence.forEach(c=>{const lbl=getLabel(c);wordCount[lbl]=(wordCount[lbl]||0)+1});
-  totalRequests++; stars+=sentence.length;
-  document.getElementById('starCount').textContent=stars;
-  history.unshift({time:new Date(),cards:[...sentence]});
-  if(history.length>30)history.pop();
-  showFeedback('🗣️ '+L.iwant+text);
-  burstStars(); checkRewards(); renderCards();
-}
-
-function playTone(freq) {
-  try{
-    const ctx=new(window.AudioContext||window.webkitAudioContext)();
-    const o=ctx.createOscillator(); const g=ctx.createGain();
-    o.type='sine'; o.frequency.value=freq;
-    o.connect(g); g.connect(ctx.destination);
-    g.gain.setValueAtTime(0.1,ctx.currentTime);
-    g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.18);
-    o.start(ctx.currentTime); o.stop(ctx.currentTime+.18);
-  }catch(e){}
-}
-
-function burstStars(){
-  ['⭐','🌟','✨'].forEach((s,i)=>setTimeout(()=>{
-    const el=document.createElement('div');
-    el.className='star-burst'; el.textContent=s;
-    el.style.cssText=`left:${30+i*90}px;top:100px;position:fixed;font-size:26px;`;
-    document.body.appendChild(el); setTimeout(()=>el.remove(),1000);
-  },i*130));
-}
-
-function showFeedback(msg){
-  const el=document.getElementById('feedback');
-  el.textContent=msg; el.className='feedback-flash show';
-  setTimeout(()=>el.className='feedback-flash',1900);
-}
-
-function switchTab(name){
-  ['cards','history','parent','rewards','editor'].forEach(t=>{
-    document.getElementById('section-'+t).style.display=t===name?'block':'none';
-    document.getElementById('tab-'+t).className='tab'+(t===name?' active':'');
-  });
-  if(name==='history')renderHistory();
-  if(name==='parent')renderAnalytics();
-  if(name==='rewards')renderRewards();
-  if(name==='editor'){renderCustomCards();renderEmojiPicker();populateCatSelect()}
-}
-
-function renderHistory() {
-  const list=document.getElementById('historyList');
-  if(!history.length){list.innerHTML=`<div class="empty-state"><div class="big">📋</div><p>${L.noHistory}</p></div>`;return}
-  list.innerHTML=history.map(h=>{
-    const t=h.time;
-    const time=t.getHours().toString().padStart(2,'0')+':'+t.getMinutes().toString().padStart(2,'0');
-    return `<div class="history-item"><div class="history-time">${time}</div><div class="history-sentence">${h.cards.map(c=>`<div class="history-chip"><span>${c.photo?'📷':c.emoji}</span>${getLabel(c)}</div>`).join('')}</div></div>`;
-  }).join('');
-}
-
-function renderAnalytics() {
-  document.getElementById('statTotal').textContent=totalRequests;
-  document.getElementById('statToday').textContent=history.filter(h=>h.time.toDateString()===new Date().toDateString()).length;
-  document.getElementById('statUnique').textContent=Object.keys(wordCount).length;
-  document.getElementById('statCards').textContent=CARD_DATA.length+customCards.length;
-  const sorted=Object.entries(wordCount).sort((a,b)=>b[1]-a[1]).slice(0,5);
-  const max=sorted[0]?sorted[0][1]:1;
-  document.getElementById('topWords').innerHTML=sorted.length?sorted.map(([w,n])=>
-    `<div class="chart-bar"><div class="chart-bar-label">${w}</div><div class="chart-bar-track"><div class="chart-bar-fill" style="width:${Math.round(n/max*100)}%"><span class="chart-bar-val">${n}</span></div></div></div>`
-  ).join(''):`<div style="color:#c0b8f0;font-size:11px;font-weight:700;padding:8px 0">—</div>`;
-}
-
-function renderRewards() {
-  const unique=Object.keys(wordCount).length;
-  const customCount=customCards.length;
-  const rnames=L.rewards;
-  document.getElementById('rewardsList').innerHTML=REWARD_DEFS.map((r,i)=>{
-    let progress=0;
-    if(r.key==='total')progress=Math.min(totalRequests,r.need);
-    if(r.key==='unique')progress=Math.min(unique,r.need);
-    if(r.key==='custom')progress=Math.min(customCount,r.need);
-    const pct=Math.round(progress/r.need*100);
-    const unlocked=progress>=r.need;
-    const rd=rnames[i]||{name:'',desc:''};
-    return `<div class="reward-card${unlocked?' unlocked':''}">
-      <div class="reward-icon">${r.icon}</div>
-      <div style="flex:1"><div class="reward-name">${rd.name}</div><div class="reward-desc">${rd.desc}</div>
-      <div class="reward-prog"><div class="reward-prog-fill" style="width:${pct}%"></div></div></div>
-      <div class="reward-badge">${unlocked?'✅':`${progress}/${r.need}`}</div>
-    </div>`;
-  }).join('');
-}
-
-function checkRewards(){renderRewards()}
-
-// ── EDITOR ──
-function populateCatSelect() {
-  const sel=document.getElementById('newCat');
-  const catLabels=L.cats.slice(1);
-  const catIds=CAT_IDS.slice(1);
-  sel.innerHTML=catIds.map((id,i)=>`<option value="${id}">${catLabels[i]||id}</option>`).join('');
-}
-
-function renderEmojiPicker() {
-  document.getElementById('emojiPicker').innerHTML=EMOJI_POOL.map(e=>
-    `<span class="emoji-opt${e===selectedEmoji?' selected':''}" onclick="selectEmoji('${e}')">${e}</span>`
-  ).join('');
-}
-
-function selectEmoji(e){selectedEmoji=e;renderEmojiPicker()}
-
-function setMode(mode) {
-  editorMode=mode;
-  document.getElementById('modeEmoji').className='mode-btn'+(mode==='emoji'?' active':'');
-  document.getElementById('modePhoto').className='mode-btn'+(mode==='photo'?' active':'');
-  document.getElementById('emojiSection').style.display=mode==='emoji'?'block':'none';
-  document.getElementById('photoSection').style.display=mode==='photo'?'block':'none';
-}
-
-function handlePhoto(e) {
-  const file=e.target.files[0]; if(!file)return;
-  const reader=new FileReader();
-  reader.onload=ev=>{
-    photoDataURL=ev.target.result;
-    const prev=document.getElementById('photoPreview');
-    prev.src=photoDataURL; prev.style.display='block';
-    document.getElementById('uploadLabel').textContent='✅ Фото выбрано';
-  };
-  reader.readAsDataURL(file);
-}
-
-function addCustomCard() {
-  const label=document.getElementById('newLabel').value.trim();
-  if(!label){showFeedback(L.enterName);return}
-  const catEl=document.getElementById('newCat');
-  const cat=catEl.value;
-  const card={id:nextId++,ru:label,kz:label,en:label,label,cat,custom:true};
-  if(editorMode==='photo'&&photoDataURL){card.photo=photoDataURL;}
-  else{card.emoji=selectedEmoji;}
-  customCards.push(card);
-  document.getElementById('newLabel').value='';
-  photoDataURL=null;
-  document.getElementById('photoPreview').style.display='none';
-  document.getElementById('uploadLabel').textContent='📷 Нажми чтобы выбрать фото';
-  document.getElementById('customCount').textContent=customCards.length;
-  renderCustomCards(); renderCards();
-  showFeedback(L.added);
-}
-
-function renderCustomCards() {
-  document.getElementById('customCount').textContent=customCards.length;
-  if(!customCards.length){
-    document.getElementById('customCardsGrid').innerHTML=`<div style="grid-column:span 3;text-align:center;padding:18px;color:#c0b8f0;font-size:11px;font-weight:700">—</div>`;return;
-  }
-  document.getElementById('customCardsGrid').innerHTML=customCards.map(c=>{
-    const img=c.photo?`<img src="${c.photo}" class="card-photo">`:`<div class="card-emoji">${c.emoji||'❓'}</div>`;
-    return `<div class="pecs-card custom-card" onclick="addCard(${c.id})">
-      <button class="card-del" style="display:flex" onclick="event.stopPropagation();deleteCustom(${c.id})">✕</button>
-      ${img}<div class="card-label">${getLabel(c)}</div></div>`;
-  }).join('');
-}
-
-function deleteCustom(id){customCards=customCards.filter(c=>c.id!==id);renderCustomCards();renderCards()}
-
-// ── EXPORT PDF ──
-function exportPDF() {
-  if(!history.length){showFeedback(L.noHistory);return}
-  const rows = history.map(h=>{
-    const t=h.time;
-    const time=t.getHours().toString().padStart(2,'0')+':'+t.getMinutes().toString().padStart(2,'0');
-    const words=h.cards.map(c=>`${c.emoji||'📷'} ${getLabel(c)}`).join('  ·  ');
-    return `<tr><td style="padding:6px 10px;color:#666;font-size:12px;white-space:nowrap">${time}</td><td style="padding:6px 10px;font-size:13px;font-weight:700">${words}</td></tr>`;
-  }).join('');
-  const html=`<!DOCTYPE html><html><head><meta charset="utf-8"><title>PECS History</title>
-  <style>body{font-family:sans-serif;padding:30px}h1{color:#6C63FF;margin-bottom:4px}p{color:#999;font-size:13px;margin-bottom:20px}table{width:100%;border-collapse:collapse}tr:nth-child(even){background:#f8f7ff}td{border-bottom:1px solid #eee}</style>
-  </head><body>
-  <h1>🗣️ ${L.appTitle}</h1>
-  <p>${new Date().toLocaleDateString()} · ${history.length} записей · ⭐ ${stars}</p>
-  <table>${rows}</table>
-  </body></html>`;
-  const blob=new Blob([html],{type:'text/html'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');
-  a.href=url; a.download='pecs-history.html'; a.click();
-  URL.revokeObjectURL(url);
-  showFeedback('📤 Файл сохранён!');
-}
-
-init();
+function me(){const s=stats();
+ $("un").textContent=[U.first_name,U.last_name].filter(Boolean).join(" ")||"Гость";$("ut").textContent=U.username?"@"+U.username:"";
+ if(U.photo_url){$("av").src=U.photo_url}else $("av").style.display="none";
+ let xp=s.o*50+Math.floor(s.sum/200),done=0;
+ $("achs").innerHTML=A.map(a=>{const c=Math.min(a[4](s),a[3]),ok=c>=a[3];if(ok){xp+=a[2];done++}
+  return `<div class="ach ${ok?"ok":""}"><span class="xp">+${a[2]} XP</span><b>${a[0]}</b><p>${a[1]}</p><div class="bar" style="margin:8px 0"><i style="width:${c/a[3]*100}%"></i></div><div class="n"><span>${c>=1000?c.toLocaleString("ru-RU"):c} / ${a[3]>=1000?a[3].toLocaleString("ru-RU"):a[3]}</span><span>+${a[2]} XP</span></div></div>`}).join("");
+ let r=0;R.forEach((x,i)=>{if(xp>=x[1])r=i});const nx=R[r+1];
+ $("lv").textContent="LVL "+(r+1);$("rk").textContent=R[r][0];$("xp").textContent=xp+" XP";
+ $("xb").style.width=(nx?(xp-R[r][1])/(nx[1]-R[r][1])*100:100)+"%";
+ $("xt").textContent=nx?`До «${nx[0]}»: ${nx[1]-xp} XP`:"Максимальный ранг";
+ $("ac").textContent=done+" / "+A.length;$("s1").textContent=s.o;$("s2").textContent=f(s.sum);
+ const d=db.form;$("fn").value=d.name||$("fn").value||[U.first_name,U.last_name].filter(Boolean).join(" ");
+ $("fp").value=d.phone||$("fp").value;$("fa").value=d.addr||$("fa").value;$("fc").value=d.note||$("fc").value;
+ $("hc").textContent=db.orders.length;
+ $("hist").innerHTML=db.orders.length?db.orders.map(x=>`<div class="line"><div><div class="nm" style="font-size:14px">${esc(x.items.map(i=>i.name+" ×"+i.qty).join(", "))}</div><div class="sub" style="font-size:12px">${new Date(x.ts).toLocaleDateString("ru-RU")} · ${esc(x.addr)}</div></div><b>${f(x.sum)}</b></div>`).join(""):`<div class="emp">У вас пока нет оформленных заказов</div>`}
+$("sv").onclick=()=>{db.form={name:$("fn").value.trim(),phone:$("fp").value.trim(),addr:$("fa").value.trim(),note:$("fc").value.trim()};save();
+ $("sv").textContent="Сохранено ✓";tg?.HapticFeedback?.notificationOccurred("success");setTimeout(()=>$("sv").textContent="Сохранить данные доставки",1500)};
+function loadP(){return fetch(SB+"/rest/v1/products?select=*&order=id",{headers:{apikey:KEY}}).then(r=>r.ok?r.json():Promise.reject())
+ .then(d=>{P=d.map(x=>({id:x.id,c:x.cat,n:x.name,s:x.sub,p:x.price,e:x.emoji,st:x.stock,img:x.img?`${SB}/storage/v1/object/public/products/${x.img}`:""}));
+  Object.keys(cart).forEach(i=>{if(!P.find(p=>p.id==i))delete cart[i]});shop();if($("v-cart").classList.contains("on"))rcart()})
+ .catch(()=>{$("grid").innerHTML='<div class="emp" style="grid-column:1/-1">Не удалось загрузить товары</div>'})}
+$("grid").innerHTML='<div class="emp" style="grid-column:1/-1">Загрузка…</div>';loadP();
 </script>
+</body>
+</html>
