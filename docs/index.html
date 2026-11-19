@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Автомат хуйни</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;800&family=Golos+Text:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --pink: #ff4fa3;
+    --lemon: #ffe94a;
+    --ink: #1c1ccf;
+    --paper: #fffdf4;
+    --text: #15154a;
+  }
+  * { box-sizing: border-box; margin: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; }
+  body {
+    background: var(--lemon);
+    color: var(--text);
+    font-family: "Golos Text", system-ui, sans-serif;
+    padding: env(safe-area-inset-top) 16px calc(env(safe-area-inset-bottom) + 16px);
+    display: flex; flex-direction: column; gap: 14px;
+  }
+  h1 {
+    font-family: "Unbounded", system-ui, sans-serif;
+    font-weight: 800; font-size: 26px; line-height: 1.05;
+    margin-top: 18px; color: var(--ink);
+    transform: rotate(-2deg); transform-origin: left;
+  }
+  .reels { display: flex; flex-direction: column; gap: 10px; }
+  .reel {
+    background: var(--paper);
+    border: 3px solid var(--ink);
+    border-radius: 14px;
+    padding: 12px 14px;
+    box-shadow: 5px 5px 0 var(--ink);
+    min-height: 62px;
+    font-family: "Unbounded", system-ui, sans-serif;
+    font-weight: 500; font-size: 17px; line-height: 1.25;
+    display: flex; align-items: center;
+  }
+  .reel:nth-child(2) { background: var(--pink); }
+  .reel.spin { animation: shake .08s linear infinite; }
+  @keyframes shake { 50% { transform: translateY(-3px) rotate(.6deg); } }
+  .buttons { display: flex; gap: 10px; margin-top: auto; }
+  button {
+    font-family: "Unbounded", system-ui, sans-serif; font-weight: 800; font-size: 15px;
+    border: 3px solid var(--ink); border-radius: 14px; padding: 16px 12px;
+    color: var(--ink); background: var(--paper); box-shadow: 4px 4px 0 var(--ink);
+    transition: transform .08s, box-shadow .08s; flex: 1;
+  }
+  button:active { transform: translate(4px, 4px); box-shadow: 0 0 0 var(--ink); }
+  button.main { background: var(--pink); flex: 2; }
+  button:disabled { opacity: .6; }
+  button:focus-visible { outline: 3px dashed var(--ink); outline-offset: 3px; }
+  .history { font-size: 14px; max-height: 22vh; overflow-y: auto; padding-left: 18px; }
+  .history li { margin-bottom: 4px; }
+  .history:empty::before { content: "Пока пусто. Крути."; margin-left: -18px; opacity: .7; }
+  @media (prefers-reduced-motion: reduce) { .reel.spin { animation: none; } }
+</style>
+</head>
+<body>
+  <h1>Автомат<br>хуйни</h1>
+
+  <div class="reels" aria-live="polite">
+    <div class="reel" id="r1">Нажми крутить</div>
+    <div class="reel" id="r2">чтобы получить</div>
+    <div class="reel" id="r3">рандомную хуйню</div>
+  </div>
+
+  <ol class="history" id="history"></ol>
+
+  <div class="buttons">
+    <button id="send" disabled>Отправить боту</button>
+    <button id="spin" class="main">Крутить</button>
+  </div>
+
+<script>
+const tg = window.Telegram?.WebApp;
+if (tg) { tg.ready(); tg.expand(); tg.setHeaderColor?.("#ffe94a"); tg.setBackgroundColor?.("#ffe94a"); }
+
+const who   = ["Дед с гусём", "Говорящий кактус", "Налоговая", "Кот-бухгалтер", "Твой будильник", "Бывший лучший друг", "Тостер-философ", "Соседский дрон", "Голубь-шпион", "Пельмень-самурай"];
+const does  = ["украл ипотеку у", "пишет диссертацию про", "тайно влюблён в", "проиграл в шахматы", "основал секту ради", "продаёт NFT из", "учит йоге", "требует выкуп за", "празднует день рождения с", "строит ракету из"];
+const what  = ["твоей тёщи", "последнего носка", "вайфая в лифте", "борща с ананасом", "вторника", "офисного фикуса", "бабушкиного ковра", "ночного шаурмена", "общего чата", "левого тапка"];
+
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const $ = id => document.getElementById(id);
+let current = "", spinning = false;
+
+function haptic(type = "light") { tg?.HapticFeedback?.impactOccurred(type); }
+
+function spin() {
+  if (spinning) return;
+  spinning = true; $("spin").disabled = true; $("send").disabled = true;
+  const reels = [$("r1"), $("r2"), $("r3")], pools = [who, does, what];
+  reels.forEach(r => r.classList.add("spin"));
+
+  let t = 0;
+  const timer = setInterval(() => {
+    reels.forEach((r, i) => { if (r.classList.contains("spin")) r.textContent = pick(pools[i]); });
+    haptic("light");
+    t++;
+    if (t === 6) stop(0); if (t === 11) stop(1);
+    if (t === 16) { stop(2); clearInterval(timer); finish(); }
+  }, 90);
+
+  function stop(i) { reels[i].classList.remove("spin"); haptic("medium"); }
+}
+
+function finish() {
+  current = `${$("r1").textContent} ${$("r2").textContent} ${$("r3").textContent}`;
+  const li = document.createElement("li");
+  li.textContent = current;
+  $("history").prepend(li);
+  spinning = false; $("spin").disabled = false; $("send").disabled = false;
+  tg?.HapticFeedback?.notificationOccurred("success");
+}
+
+function send() {
+  if (!current) return;
+  if (tg) tg.sendData(JSON.stringify({ text: current })); // закроет мини-апп
+  else alert("Открой через Telegram, чтобы отправить боту:\n" + current);
+}
+
+$("spin").addEventListener("click", spin);
+$("send").addEventListener("click", send);
+</script>
+</body>
+</html>
