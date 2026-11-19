@@ -1,4 +1,4 @@
-# Бот с рандомной хуйнёй + Mini App
+# Бот с Mini App
 
 ## Запуск
 1. @BotFather → /newbot → получи токен.
