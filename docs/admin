@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Админка</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="config.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#101114;--pan:#17181d;--line:#2a2c33;--tx:#eceef0;--dim:#7d818c;--w:#f4f4f2;--red:#ff6b6b;--grn:#7bd88f}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--tx);font-family:Manrope,system-ui,sans-serif;padding:env(safe-area-inset-top) 0 calc(96px + env(safe-area-inset-bottom))}
+.v{display:none}.v.on{display:block}
+button{font-family:inherit;cursor:pointer;color:var(--tx)}
+.cap{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--dim)}
+.hd{display:flex;align-items:center;gap:12px;padding:16px;border-bottom:1px solid var(--line)}
+.hd b{font-size:20px;font-weight:800;flex:1}
+.sq{min-width:46px;height:46px;background:var(--pan);border:1px solid var(--line);font-size:18px;border-radius:2px;padding:0 12px}
+.seg{display:flex;border-bottom:1px solid var(--line)}
+.seg button{flex:1;background:none;border:0;border-bottom:2px solid transparent;padding:16px;font-size:13px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
+.seg button.on{color:var(--w);border-color:var(--w)}
+.pad{padding:16px}
+.btn{width:100%;background:none;border:1px solid var(--w);padding:17px;font-weight:800;font-size:13px;letter-spacing:.16em;text-transform:uppercase;border-radius:2px;margin-top:14px}
+.btn.fill{background:var(--w);color:#111}.btn.red{border-color:var(--red);color:var(--red)}.btn:disabled{opacity:.4}
+.row{display:flex;gap:14px;align-items:center;width:100%;text-align:left;background:var(--pan);border:1px solid var(--line);padding:10px;margin-bottom:10px;border-radius:2px}
+.th{position:relative;flex:none;width:60px;height:60px;display:grid;place-items:center;font-size:28px;background:#0f1013;overflow:hidden}
+.th img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.row b{display:block;font-size:16px;margin-bottom:4px}.row span{font-size:13px;color:var(--dim)}
+label{display:block;margin:16px 0 8px}
+.fi{width:100%;background:#0f1013;border:1px solid var(--line);padding:15px;color:var(--tx);font:16px Manrope;border-radius:2px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ph{display:flex;gap:12px;align-items:center;margin-top:8px}.ph .th{width:84px;height:84px}
+.emp{text-align:center;color:var(--dim);padding:30px 8px}
+.note{font-size:14px;color:var(--dim);line-height:1.5;margin:10px 0}
+.ord{background:var(--pan);border:1px solid var(--line);padding:14px;margin-bottom:12px;border-radius:2px;font-size:14px;line-height:1.5}
+.ord h3{font-size:16px;display:flex;justify-content:space-between;margin-bottom:6px}
+.st{font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}.st.new{color:#ffd166}.st.done{color:var(--grn)}.st.canceled{color:var(--red)}
+.ord .acts{display:flex;gap:8px;margin-top:10px}.ord .acts button{flex:1;padding:12px;background:none;border:1px solid var(--line);border-radius:2px;font-weight:600}
+#toast{position:fixed;left:16px;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));background:var(--w);color:#111;padding:15px;font-weight:600;font-size:14px;display:none;z-index:9;border-radius:2px}
+:focus-visible{outline:2px dashed var(--w);outline-offset:2px}
+</style>
+</head>
+<body>
+
+<section class="v" id="v-login"><div class="hd"><b>Вход в админку</b></div><div class="pad">
+  <p class="note">Войди почтой и паролем, которые ты создал в Supabase (Authentication → Users).</p>
+  <label class="cap">Почта</label><input class="fi" id="em" type="email" autocomplete="username">
+  <label class="cap">Пароль</label><input class="fi" id="pw" type="password" autocomplete="current-password">
+  <button class="btn fill" id="go">Войти</button>
+</div></section>
+
+<section class="v" id="v-list"><div class="hd"><b>Админка</b><button class="sq out">⎋</button></div><div class="seg"></div>
+  <div class="pad" id="items"></div>
+  <div style="position:fixed;left:16px;right:16px;bottom:calc(14px + env(safe-area-inset-bottom))"><button class="btn fill" id="add" style="margin:0">+ Добавить товар</button></div>
+</section>
+
+<section class="v" id="v-orders"><div class="hd"><b>Админка</b><button class="sq out">⎋</button></div><div class="seg"></div>
+  <div class="pad" id="ords"></div>
+</section>
+
+<section class="v" id="v-edit"><div class="hd"><button class="sq" id="back">←</button><b id="etitle">Товар</b></div><div class="pad">
+  <label class="cap" style="margin-top:0">Название</label><input class="fi" id="en">
+  <label class="cap">Подпись</label><input class="fi" id="es" placeholder="Хлопок · чёрная">
+  <label class="cap">Категория</label><input class="fi" id="ec" list="cats"><datalist id="cats"></datalist>
+  <div class="two"><div><label class="cap">Цена</label><input class="fi" id="ep" inputmode="numeric"></div><div><label class="cap">Остаток</label><input class="fi" id="et" inputmode="numeric" placeholder="0 = нет"></div></div>
+  <label class="cap">Фото</label>
+  <div class="ph"><div class="th" id="eth"></div><div style="flex:1"><button class="btn" id="pick" style="margin:0 0 8px;padding:13px">Выбрать фото</button><button class="btn" id="unpick" style="margin:0;padding:13px">Убрать фото</button></div></div>
+  <input type="file" id="file" accept="image/*" hidden>
+  <label class="cap">Эмодзи (если нет фото)</label><input class="fi" id="ee" maxlength="4" placeholder="📦">
+  <button class="btn fill" id="save">Сохранить</button>
+  <button class="btn red" id="del">Удалить товар</button>
+</div></section>
+<div id="toast"></div>
+
+<script>
+const tg=window.Telegram?.WebApp;if(tg){tg.ready();tg.expand()}
+const {SB,KEY}=window.CFG,$=i=>document.getElementById(i);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const imgUrl=n=>`${SB}/storage/v1/object/public/products/${n}`;
+let ses=null;try{ses=JSON.parse(localStorage.getItem("ses2")||"null")}catch(e){}
+let items=[],cur=null,pend=null,rem=false;
+
+function view(v){document.querySelectorAll(".v").forEach(x=>x.classList.toggle("on",x.id==="v-"+v));scrollTo(0,0)}
+let tt;function toast(t){const e=$("toast");e.textContent=t;e.style.display="block";clearTimeout(tt);tt=setTimeout(()=>e.style.display="none",4000)}
+document.querySelectorAll(".seg").forEach(s=>{s.innerHTML='<button data-t="list">Товары</button><button data-t="orders">Заказы</button>';
+ s.onclick=e=>{const t=e.target.dataset.t;if(t)tab(t)}});
+function tab(t){document.querySelectorAll(".seg button").forEach(b=>b.classList.toggle("on",b.dataset.t===t));view(t);t==="list"?loadP():loadO()}
+document.querySelectorAll(".out").forEach(b=>b.onclick=()=>{if(confirm("Выйти?")){setSes(null);view("login")}});
+
+function setSes(j){ses=j?{at:j.access_token,rt:j.refresh_token,exp:Date.now()+j.expires_in*1000}:null;
+ ses?localStorage.setItem("ses2",JSON.stringify(ses)):localStorage.removeItem("ses2")}
+async function auth(body,type){const r=await fetch(`${SB}/auth/v1/token?grant_type=${type}`,{method:"POST",headers:{apikey:KEY,"Content-Type":"application/json"},body:JSON.stringify(body)});
+ const j=await r.json();if(!r.ok)throw new Error(j.error_description||j.msg||"Не удалось войти");setSes(j)}
+async function api(path,o={}){
+ if(!ses)throw new Error("Нужно войти");
+ if(ses.exp-Date.now()<60000)await auth({refresh_token:ses.rt},"refresh_token");
+ const{json,headers,...rest}=o;
+ const r=await fetch(SB+path,{...rest,body:json?JSON.stringify(json):o.body,headers:{apikey:KEY,Authorization:"Bearer "+ses.at,...(json?{"Content-Type":"application/json"}:{}),...headers}});
+ if(r.status===401){setSes(null);view("login");throw new Error("Сессия истекла, войди заново")}
+ const t=await r.text();let d=null;try{d=t?JSON.parse(t):null}catch(e){}
+ if(!r.ok)throw new Error(d?.message||d?.error||r.status);return d}
+
+$("go").onclick=async()=>{const email=$("em").value.trim(),password=$("pw").value;if(!email||!password)return toast("Заполни почту и пароль");
+ $("go").disabled=true;try{await auth({email,password},"password");tab("list")}catch(e){toast(e.message)}$("go").disabled=false};
+
+async function loadP(){$("items").innerHTML='<div class="emp">Загрузка…</div>';
+ try{items=await api("/rest/v1/products?select=*&order=id")}catch(e){$("items").innerHTML=`<div class="emp">${esc(e.message)}</div>`;return}
+ $("items").innerHTML=items.length?items.map(p=>`<button class="row" data-id="${p.id}"><div class="th">${esc(p.emoji)}${p.img?`<img src="${esc(imgUrl(p.img))}" alt="" onerror="this.remove()">`:""}</div>
+ <div><b>${esc(p.name)}</b><span>${esc(p.cat)} · ${p.price} · ${p.stock>0?"остаток "+p.stock:"нет в наличии"}</span></div></button>`).join(""):'<div class="emp">Товаров пока нет. Жми «Добавить».</div>';
+ $("cats").innerHTML=[...new Set(items.map(p=>p.cat))].map(c=>`<option value="${esc(c)}">`).join("")}
+
+const SL={new:"Новый",done:"Выполнен",canceled:"Отменён"};
+async function loadO(){$("ords").innerHTML='<div class="emp">Загрузка…</div>';let o;
+ try{o=await api("/rest/v1/orders?select=*&order=id.desc&limit=50")}catch(e){$("ords").innerHTML=`<div class="emp">${esc(e.message)}</div>`;return}
+ $("ords").innerHTML=o.length?o.map(x=>`<div class="ord"><h3><span>№${x.id} · ${x.total}</span><span class="st ${x.status}">${SL[x.status]}</span></h3>
+ <div>${esc(x.items.map(i=>i.name+" ×"+i.qty).join(", "))}</div>
+ <div class="cap" style="letter-spacing:0;text-transform:none;font-size:13px;margin-top:6px">${new Date(x.created_at).toLocaleString("ru-RU")}${x.tg_username?" · @"+esc(x.tg_username):""}</div>
+ <div style="margin-top:6px">${esc(x.name)} · ${esc(x.phone)}<br>${esc(x.addr)}${x.note?"<br>"+esc(x.note):""}</div>
+ ${x.status==="new"?`<div class="acts"><button data-a="done" data-id="${x.id}">✓ Выполнен</button><button data-a="cancel" data-id="${x.id}">✕ Отменить</button></div>`:""}</div>`).join(""):'<div class="emp">Заказов пока нет</div>'}
+$("ords").onclick=async e=>{const b=e.target.closest("[data-a]");if(!b)return;const id=+b.dataset.id;
+ if(b.dataset.a==="cancel"&&!confirm("Отменить заказ №"+id+"? Товар вернётся на склад."))return;
+ try{b.dataset.a==="done"?await api(`/rest/v1/orders?id=eq.${id}`,{method:"PATCH",json:{status:"done"}}):await api("/rest/v1/rpc/cancel_order",{method:"POST",json:{oid:id}});
+  toast("Готово");loadO()}catch(x){toast("Ошибка: "+x.message)}};
+
+function toJpeg(file){return new Promise((ok,no)=>{const im=new Image();im.onload=()=>{const k=Math.min(1,1000/Math.max(im.width,im.height)),c=document.createElement("canvas");
+ c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext("2d").drawImage(im,0,0,c.width,c.height);c.toBlob(b=>b?ok(b):no(),"image/jpeg",.85)};im.onerror=no;im.src=URL.createObjectURL(file)})}
+async function upImg(b){const n=Date.now()+".jpg";await api("/storage/v1/object/products/"+n,{method:"POST",body:b,headers:{"Content-Type":"image/jpeg"}});return n}
+async function rmImg(n){if(!n)return;try{await api("/storage/v1/object/products/"+n,{method:"DELETE"})}catch(e){}}
+
+function photoBox(src){$("eth").innerHTML=esc($("ee").value||cur?.emoji||"📦")+(src?`<img src="${src}" alt="">`:"");$("unpick").style.display=src?"block":"none"}
+function openEdit(p){cur=p;pend=null;rem=false;$("etitle").textContent=p?"Изменить товар":"Новый товар";
+ $("en").value=p?.name||"";$("es").value=p?.sub||"";$("ec").value=p?.cat||"";$("ep").value=p?.price??"";$("et").value=p?.stock??"";$("ee").value=p?.emoji||"";
+ $("del").style.display=p?"block":"none";photoBox(p?.img?imgUrl(p.img):"");view("edit")}
+$("items").onclick=e=>{const b=e.target.closest(".row");if(b)openEdit(items.find(x=>x.id==b.dataset.id))};
+$("add").onclick=()=>openEdit(null);$("back").onclick=()=>tab("list");
+$("pick").onclick=()=>$("file").click();
+$("file").onchange=async e=>{const f=e.target.files[0];if(!f)return;try{pend=await toJpeg(f);rem=false;photoBox(URL.createObjectURL(pend))}catch(x){toast("Не удалось открыть фото")}e.target.value=""};
+$("unpick").onclick=()=>{pend=null;rem=true;photoBox("")};
+
+function busy(b){["save","del"].forEach(i=>$(i).disabled=b)}
+$("save").onclick=async()=>{const name=$("en").value.trim(),p=$("ep").value.trim(),st=$("et").value.trim();
+ if(!name)return toast("Впиши название");if(!/^\d+$/.test(p))return toast("Цена — число");if(st&&!/^\d+$/.test(st))return toast("Остаток — число");
+ busy(true);toast("Сохраняю…");
+ try{let img=cur?.img||"",old=null;if(pend){old=img;img=await upImg(pend)}else if(rem){old=img;img=""}
+  const d={cat:$("ec").value.trim()||"Разное",name,sub:$("es").value.trim(),price:+p,emoji:$("ee").value.trim()||"📦",stock:+(st||0),img};
+  cur?await api(`/rest/v1/products?id=eq.${cur.id}`,{method:"PATCH",json:d}):await api("/rest/v1/products",{method:"POST",json:d,headers:{Prefer:"return=minimal"}});
+  if(old)await rmImg(old);
+  tg?.HapticFeedback?.notificationOccurred("success");toast("Сохранено. В магазине уже видно");tab("list")}catch(e){toast("Ошибка: "+e.message)}busy(false)};
+$("del").onclick=async()=>{if(!confirm("Удалить «"+cur.name+"» насовсем?"))return;busy(true);
+ try{await api(`/rest/v1/products?id=eq.${cur.id}`,{method:"DELETE"});await rmImg(cur.img);toast("Удалено");tab("list")}catch(e){toast("Ошибка: "+e.message)}busy(false)};
+
+ses?tab("list"):view("login");
+</script>
+</body>
+</html>
