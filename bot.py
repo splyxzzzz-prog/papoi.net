@@ -1,76 +1,62 @@
-import asyncio
-import json
-import logging
-import os
-import random
-
+import asyncio, json, logging, os
 from aiogram import Bot, Dispatcher, F
 from aiogram.filters import Command
-from aiogram.types import (
-    KeyboardButton,
-    Message,
-    ReplyKeyboardMarkup,
-    WebAppInfo,
-)
+from aiogram.types import (InlineKeyboardButton, InlineKeyboardMarkup, KeyboardButton,
+                           BotCommand, Message, ReplyKeyboardMarkup, WebAppInfo)
 from dotenv import load_dotenv
+
+from game import MuteMW, router as game_router
 
 load_dotenv()
 logging.basicConfig(level=logging.INFO)
-
 BOT_TOKEN = os.environ["BOT_TOKEN"]
 WEBAPP_URL = os.environ["WEBAPP_URL"]
+ADMIN_ID = int(os.environ["ADMIN_ID"])
 
 dp = Dispatcher()
-
-REACTIONS = [
-    "Это шедевр, не спорю 🗿",
-    "Вселенная одобряет 🌌",
-    "Ну и бред. Мне нравится 🤌",
-    "Записал в архив великой хуйни 📜",
-    "Ты это сам придумал? Гений 🧠",
-    "Бабушка бы одобрила 👵",
-]
+dp.message.outer_middleware(MuteMW())
+dp.include_router(game_router)
 
 
-def keyboard() -> ReplyKeyboardMarkup:
-    # sendData() в мини-аппе работает ТОЛЬКО с кнопкой из обычной (reply) клавиатуры
-    return ReplyKeyboardMarkup(
-        keyboard=[
-            [KeyboardButton(text="🎰 Открыть автомат хуйни", web_app=WebAppInfo(url=WEBAPP_URL))],
-            [KeyboardButton(text="🎲 Рандом прямо тут")],
-        ],
-        resize_keyboard=True,
-    )
+@dp.message(Command("start"), F.chat.type == "private")
+async def start(m: Message):
+    kb = ReplyKeyboardMarkup(
+        keyboard=[[KeyboardButton(text="🛍 Открыть магазин", web_app=WebAppInfo(url=WEBAPP_URL))]],
+        resize_keyboard=True)
+    hint = "\n\nАдмин-панель: /admin" if m.from_user.id == ADMIN_ID else ""
+    await m.answer("Привет! Жми кнопку внизу, чтобы открыть магазин 👇" + hint, reply_markup=kb)
 
 
-@dp.message(Command("start"))
-async def start(message: Message):
-    await message.answer(
-        "Привет. Я бот, который генерирует рандомную хуйню.\n"
-        "Жми кнопку внизу — откроется мини-апп 👇",
-        reply_markup=keyboard(),
-    )
-
-
-@dp.message(F.text == "🎲 Рандом прямо тут")
-async def quick_random(message: Message):
-    number = random.randint(1, 10**6)
-    await message.answer(f"Твоё число: {number}\nБесполезно, зато честно.")
+@dp.message(Command("admin"), F.from_user.id == ADMIN_ID)
+async def admin(m: Message):
+    url = WEBAPP_URL.rstrip("/") + "/admin.html"
+    kb = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="⚙️ Открыть админку", web_app=WebAppInfo(url=url))]])
+    await m.answer("Товары и заказы:", reply_markup=kb)
 
 
 @dp.message(F.web_app_data)
-async def from_webapp(message: Message):
+async def order(m: Message):
     try:
-        data = json.loads(message.web_app_data.data)
-        text = str(data.get("text", ""))[:500]
-    except (json.JSONDecodeError, AttributeError):
-        text = message.web_app_data.data[:500]
-
-    await message.answer(f"Из мини-аппа прилетело:\n\n«{text}»\n\n{random.choice(REACTIONS)}")
+        d = json.loads(m.web_app_data.data)
+        if d.get("type") != "order":
+            return
+        lines = [f"• {i['name']} ×{i['qty']} — {i['price'] * i['qty']}" for i in d["items"]]
+        text = (f"🧾 Новый заказ №{d['id']}\n\n" + "\n".join(lines) + f"\n\nИтого: {d['sum']} {d.get('cur', '')}\n"
+                f"Имя: {d['name']}\nТелефон: {d['phone']}\nАдрес: {d['addr']}\n"
+                f"Комментарий: {d.get('note') or '—'}\nОт: @{m.from_user.username or m.from_user.id}")
+    except (json.JSONDecodeError, KeyError, TypeError):
+        return await m.answer("Не получилось прочитать заказ, попробуй ещё раз.")
+    await m.bot.send_message(ADMIN_ID, text)
+    await m.answer(f"Заказ №{d['id']} принят ✅ Скоро свяжемся с тобой.")
 
 
 async def main():
     bot = Bot(BOT_TOKEN)
+    await bot.set_my_commands([
+        BotCommand(command="roulette", description="Рулетка на XP"),
+        BotCommand(command="top", description="Топ стрелков чата"),
+        BotCommand(command="xp", description="Мой XP"),
+    ])
     await dp.start_polling(bot)
 
 
